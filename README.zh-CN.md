@@ -27,13 +27,13 @@ fastapi run app/main.py --host 127.0.0.1 --port 8000
 
 ```sh
 docker build -t text-extractor .
-docker run --rm --name text-extractor \
+docker run -d --name text-extractor \
   -p 127.0.0.1:8000:8000 \
-  --env-file .env \
+  -v "$PWD/.env:/app/.env:ro" \
   text-extractor
 ```
 
-运行前先配置 .env。镜像包含应用代码和运行依赖，配置在启动时注入。MODEL_BASE_URL 必须是容器可访问的地址。连接宿主机上的服务时，可添加 `--add-host=host.docker.internal:host-gateway`，并使用 host.docker.internal 和对应服务端口；容器内 localhost 指向容器自身。
+运行前先配置 .env。镜像包含应用代码和运行依赖；.env 以只读方式挂载到 /app/.env，由应用在启动时加载，容器上显式设置的环境变量仍然优先。MODEL_BASE_URL 必须是容器可访问的地址。连接宿主机上的服务时，可添加 `--add-host=host.docker.internal:host-gateway`，并使用 host.docker.internal 和对应服务端口；容器内 localhost 指向容器自身。
 
 容器监听 8000 端口，以普通用户运行，通过 `/health` 检查存活。添加 `-e DEBUG=true` 可打印请求及模型流式日志，使用 `docker logs -f text-extractor` 查看。模型推理仍由独立模型服务完成。
 

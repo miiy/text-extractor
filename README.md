@@ -27,13 +27,13 @@ Build and run the API with your model service configuration:
 
 ```sh
 docker build -t text-extractor .
-docker run --rm --name text-extractor \
+docker run -d --name text-extractor \
   -p 127.0.0.1:8000:8000 \
-  --env-file .env \
+  -v "$PWD/.env:/app/.env:ro" \
   text-extractor
 ```
 
-Configure .env before running the container. The image contains application code and runtime dependencies; configuration is supplied at startup. MODEL_BASE_URL must be reachable from the container. For a service on the host, add `--add-host=host.docker.internal:host-gateway` and use `host.docker.internal` with the service port. Container localhost refers to the container itself.
+Configure .env before running the container. The image contains application code and runtime dependencies; the file is mounted read-only at /app/.env and loaded by the application at startup, and environment variables set on the container still take precedence. MODEL_BASE_URL must be reachable from the container. For a service on the host, add `--add-host=host.docker.internal:host-gateway` and use `host.docker.internal` with the service port. Container localhost refers to the container itself.
 
 The container listens on port 8000, runs as a non-root user, and checks `/health`. Add `-e DEBUG=true` to print request and model stream logs; use `docker logs -f text-extractor` to follow them. Model inference remains in the separate model server.
 
